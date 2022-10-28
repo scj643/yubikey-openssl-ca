@@ -1,2 +1,7 @@
 yk-vars
 private
+csr
+certs
+db
+public
+private
