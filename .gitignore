@@ -5,3 +5,6 @@ certs
 db
 public
 private
+
+# Python venv
+venv
