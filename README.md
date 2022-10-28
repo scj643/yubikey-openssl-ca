@@ -37,7 +37,7 @@ For demo purposes we have the Yubikey Pin stored in a file called `yk-vars` and 
 YK_MANAGEMENT=[GENERATED MANAGEMENT KEY]
 YK_PIN=123456
 YK_PUK=12345678
-SSL_O="Test CA"
+SSL_O="Demo"
 SSL_C="US"
 ```
 ## Set PIN and PUK Retries (Optional)
@@ -53,6 +53,10 @@ This will reset the pin to default
 ## Set PUK
 `ykman piv access change-puk -p 12345678`
 
+## Enable all keys for PKCS11
+(Yubico's docs are not correct for object import since it doesn't convert the hex string to binary)
+`echo -n C10114C20100FE00 | xxd -r -p | ykman piv objects import 0x5FC10C - -P $YK_PIN  -m $YK_MANAGEMENT`
+
 ## Generate key and write public key to `public/root.pem`
 `ykman piv keys generate -a ECCP384 -F pem --pin-policy ALWAYS --touch-policy ALWAYS 9c -m $YK_MANAGEMENT -P $YK_PIN public/root.pem`
 
@@ -65,10 +69,10 @@ You may need to change the line `MODULE_PATH` in the `pkcs11_section` of `root.c
 `openssl req -new -config root.cnf -engine pkcs11 -keyform engine -key "pkcs11:object=Private key for Digital Signature;type=private"  -out csr/ca.csr`
 
 ### Self Sign
-`openssl ca -selfsign -config root.cnf -in csr/ca.csr -out certs/ca.crt -extensions ca_ext -keyform engine -engine pkcs11`
+`openssl ca -selfsign -config root.cnf -in csr/ca.csr -out certs/root.crt -extensions ca_ext -keyform engine -engine pkcs11`
 
 ### Import x509 to Yubikey
-`ykman piv certificates import -m $YK_MANAGEMENT -P $YK_PIN 9c certs/ca.crt`
+`ykman piv certificates import -m $YK_MANAGEMENT -P $YK_PIN 9c certs/root.crt`
 
 ## CRL
 ### Generate CRL
@@ -85,10 +89,16 @@ You may need to change the line `MODULE_PATH` in the `pkcs11_section` of `root.c
 Optional and this cert can not be revoked.
 `openssl ca -config root.cnf -keyform engine -engine pkcs11 -in root-ocsp.csr -out root-ocsp.crt -extensions ocsp_ext -days 365`
 
+# Notes
+## p11-tool
+Using p11-tool requires telling it to use the libykcs11.so.2 library.
+`alias p11tool-yk="p11tool --provider /usr/lib64/libykcs11.so.2"`
 # References
 [Openssl Cookbook: Creating a Root CA](https://www.feistyduck.com/library/openssl-cookbook/online/openssl-command-line/private-ca-creating-root.html)  
 [Smallstep: Build a Tiny Certificate Authority For Your Homelab](https://smallstep.com/blog/build-a-tiny-ca-with-raspberry-pi-yubikey/)  
 [Yubico: Certificate Authority with a YubiKey](https://developers.yubico.com/PIV/Guides/Certificate_authority.html)  
+## Allowing Retired Management keys
+[Retired PIV Slots Unavailable When Accessing via PKCS11](https://support.yubico.com/hc/en-us/articles/4585159896220-Troubleshooting-Retired-PIV-Slots-Unavailable-When-Accessing-via-PKCS11)  
 ## http://cedric.dufour.name
 [Yubikey PIV Info](http://cedric.dufour.name/blah/IT/YubiKeyHowto.html)  
 [General PKCS11 Info](http://cedric.dufour.name/blah/IT/SmartCardsHowto.html)  
