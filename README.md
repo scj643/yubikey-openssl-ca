@@ -83,9 +83,9 @@ Optional and this cert can not be revoked.
 `openssl ca -config root.cnf -keyform engine -engine pkcs11 -in root-ocsp.csr -out root-ocsp.crt -extensions ocsp_ext -days 365`
 
 # References
-[Openssl Cookbook: Creating a Root CA](https://www.feistyduck.com/library/openssl-cookbook/online/openssl-command-line/private-ca-creating-root.html)
-[Smallstep: Build a Tiny Certificate Authority For Your Homelab](https://smallstep.com/blog/build-a-tiny-ca-with-raspberry-pi-yubikey/)
-[Yubico: Certificate Authority with a YubiKey](https://developers.yubico.com/PIV/Guides/Certificate_authority.html)
+[Openssl Cookbook: Creating a Root CA](https://www.feistyduck.com/library/openssl-cookbook/online/openssl-command-line/private-ca-creating-root.html)  
+[Smallstep: Build a Tiny Certificate Authority For Your Homelab](https://smallstep.com/blog/build-a-tiny-ca-with-raspberry-pi-yubikey/)  
+[Yubico: Certificate Authority with a YubiKey](https://developers.yubico.com/PIV/Guides/Certificate_authority.html)  
 ## http://cedric.dufour.name
-[Yubikey PIV Info](http://cedric.dufour.name/blah/IT/YubiKeyHowto.html)
-[General PKCS11 Info](http://cedric.dufour.name/blah/IT/SmartCardsHowto.html)
+[Yubikey PIV Info](http://cedric.dufour.name/blah/IT/YubiKeyHowto.html)  
+[General PKCS11 Info](http://cedric.dufour.name/blah/IT/SmartCardsHowto.html)  
