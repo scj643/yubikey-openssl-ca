@@ -32,8 +32,8 @@ URI.0 = $crl_url
 
 [ ca_dn ]
 countryName = "US"
-organizationName = "$org_name"
-commonName = "$ca_name Root CA"
+organizationName = ${org_name}
+commonName = ${ca_name} Root CA
 
 [ca_default]
 home                    = .
