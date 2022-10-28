@@ -21,6 +21,15 @@ permitted;email.2=example.com
 permitted;email.3=.example.com
 ```
 
+# Directory Setup
+```sh
+mkdir certs csr db public private
+chmod 700 private
+touch db/index
+openssl rand -hex 16  > db/serial
+echo 1001 > db/crlnumber
+```
+
 # Yubikey
 ## Demo environment variables
 For demo purposes we have the Yubikey Pin stored in a file called `yk-vars` and use the default pins
@@ -44,28 +53,19 @@ This will reset the pin to default
 ## Set PUK
 `ykman piv access change-puk -p 12345678`
 
-## Generate key and write public key to stdout
-`ykman piv keys generate -a ECCP384 -F pem --pin-policy ALWAYS --touch-policy ALWAYS 9c -`
+## Generate key and write public key to `public/root.pem`
+`ykman piv keys generate -a ECCP384 -F pem --pin-policy ALWAYS --touch-policy ALWAYS 9c -m $YK_MANAGEMENT -P $YK_PIN public/root.pem`
 
 # Root certificate
-## Directory Setup
-```sh
-mkdir certs db private
-chmod 700 private
-touch db/index
-openssl rand -hex 16  > db/serial
-echo 1001 > db/crlnumber
-```
-
 ## CA Setup
 ### Notes
 You may need to change the line `MODULE_PATH` in the `pkcs11_section` of `root.cnf` depending on your OS
 
 ### CSR
-`openssl req -new -config root.cnf -engine pkcs11 -keyform engine -key "pkcs11:object=Private key for Digital Signature;type=private"  -out ca.csr`
+`openssl req -new -config root.cnf -engine pkcs11 -keyform engine -key "pkcs11:object=Private key for Digital Signature;type=private"  -out csr/ca.csr`
 
 ### Self Sign
-`openssl ca -selfsign -config root.cnf -in ca.csr -out ca.crt -extensions ca_ext -keyform engine -engine pkcs11`
+`openssl ca -selfsign -config root.cnf -in csr/ca.csr -out certs/ca.crt -extensions ca_ext -keyform engine -engine pkcs11`
 
 ## CRL
 ### Generate CRL
