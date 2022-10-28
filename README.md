@@ -23,7 +23,7 @@ permitted;email.3=.example.com
 
 # Directory Setup
 ```sh
-mkdir certs csr db public private
+mkdir certs crl csr db public private
 chmod 700 private
 touch db/index
 openssl rand -hex 16  > db/serial
@@ -67,9 +67,12 @@ You may need to change the line `MODULE_PATH` in the `pkcs11_section` of `root.c
 ### Self Sign
 `openssl ca -selfsign -config root.cnf -in csr/ca.csr -out certs/ca.crt -extensions ca_ext -keyform engine -engine pkcs11`
 
+### Import x509 to Yubikey
+`ykman piv certificates import -m $YK_MANAGEMENT -P $YK_PIN 9c certs/ca.crt`
+
 ## CRL
 ### Generate CRL
-`openssl ca -config root.cnf -keyform engine -engine pkcs11 -gencrl -out root.crl -cert certs/CA_SERIAL.pem`
+`openssl ca -config root.cnf -keyform engine -engine pkcs11 -gencrl -out crl/root.crl -cert certs/ca.pem`
 
 ## OCSP Cert
 ### Generate EC Params
