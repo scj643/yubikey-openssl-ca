@@ -7,6 +7,7 @@ pkcs11 = pkcs11_section
 [pkcs11_section]
 engine_id = pkcs11
 MODULE_PATH = /usr/lib64/libykcs11.so.2
+VERBOSE = EMPTY
 init = 0
 
 [default]
@@ -43,7 +44,7 @@ crlnumber               = $home/db/crlnumber
 engine                  = pkcs11
 keyform                 = engine
 private_key             = "pkcs11:object=Private key for Digital Signature;type=private"
-certificate             = $home/$name.crt
+certificate             = $home/certs/$name.crt
 new_certs_dir           = $home/certs
 unique_subject          = no
 copy_extensions         = none
