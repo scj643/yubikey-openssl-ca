@@ -1,0 +1,91 @@
+openssl_conf = openssl_init
+
+[openssl_init]
+engines = engine_section
+[engine_section]
+pkcs11 = pkcs11_section
+[pkcs11_section]
+engine_id = pkcs11
+MODULE_PATH = /usr/lib64/libykcs11.so.2
+init = 0
+
+[default]
+issuer_domain = example.org
+org_name = "Demo"
+name = root
+engine = pkcs11
+keyform = engine
+ca_name = "Demo (Do not trust)"
+# URLs are based on the name and have the following paths
+aia_url = http://$issuer_domain/$name/ca
+crl_url = http://$issuer_domain/$name/crl
+ocsp_url = http://$issuer_domain/$name/ocsp
+default_ca = ca_default
+name_opt = utf8,esc_ctrl,multiline,lname,align
+
+[issuer_info]
+caIssuers;URI.0         = $aia_url
+OCSP;URI.0              = $ocsp_url
+
+[crl_info]
+URI.0 = $crl_url
+
+[ ca_dn ]
+countryName = "US"
+organizationName = "$org_name"
+commonName = "$ca_name Root CA"
+
+[ca_default]
+home                    = .
+database                = $home/db/index
+serial                  = $home/db/serial
+crlnumber               = $home/db/crlnumber
+engine                  = pkcs11
+keyform                 = engine
+private_key             = "pkcs11:object=Private key for Digital Signature;type=private"
+certificate             = $home/$name.crt
+new_certs_dir           = $home/certs
+unique_subject          = no
+copy_extensions         = none
+default_days            = 3650
+default_crl_days        = 365
+default_md              = sha256
+policy                  = policy_c_o_match
+
+[policy_c_o_match]
+countryName             = match
+stateOrProvinceName     = optional
+organizationName        = match
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ req ]
+x509_extensions = ca_ext
+distinguished_name = ca_dn
+default_md = sha256
+prompt = no
+
+[ocsp_ext]
+authorityKeyIdentifier  = keyid:always
+basicConstraints        = critical,CA:false
+extendedKeyUsage        = OCSPSigning
+keyUsage                = critical,digitalSignature
+subjectKeyIdentifier    = hash
+
+[ ca_ext ]
+subjectKeyIdentifier=hash
+basicConstraints=critical,CA:true,pathlen:1
+keyUsage=critical,keyCertSign,cRLSign
+nameConstraints=critical,@nc
+crlDistributionPoints = @crl_info
+authorityInfoAccess = @issuer_info
+
+[ nc ]
+permitted;DNS.0=example.org
+permitted;URI.0=example.org
+permitted;URI.1=.example.org
+permitted;email.0=example.org
+permitted;email.1=.example.org
+excluded;IP.0=0.0.0.0/0.0.0.0
+excluded;IP.1=0:0:0:0:0:0:0:0/0:0:0:0:0:0:0:0
