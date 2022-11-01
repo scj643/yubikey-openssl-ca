@@ -1,5 +1,13 @@
 # Overview
 This repo documents how to use a Yubikey as a root CA with domain constraints to limit issuing certs.
+Using environment variables is not recommended. It is only done here for demonstration purposes.
+
+## Package Requirements
+### `yubico-piv-tool`
+Needed for the `libykcs11.so.2` library
+
+### `ykman`
+Needed to manage the pin, puk, and management key
 
 # gen\_permitted.py
 This script takes a list of domains and generate the name constraint list for you.
@@ -55,6 +63,9 @@ This will reset the pin to default
 
 ## Enable all keys for PKCS11
 (Yubico's docs are not correct for object import since it doesn't convert the hex string to binary)
+`echo -n C10114C20100FE00 | xxd -r -p > /tmp/yk_all_objects`
+`ykman piv objects import 0x5FC10C /tmp/yk_all_objects`
+### One liner with environment variables
 `echo -n C10114C20100FE00 | xxd -r -p | ykman piv objects import 0x5FC10C - -P $YK_PIN  -m $YK_MANAGEMENT`
 
 ## Generate key and write public key to `public/root.pem`
@@ -66,17 +77,17 @@ This will reset the pin to default
 You may need to change the line `MODULE_PATH` in the `pkcs11_section` of `root.cnf` depending on your OS
 
 ### CSR
-`openssl req -new -config root.cnf -engine pkcs11 -keyform engine -key "pkcs11:object=Private key for Digital Signature;type=private"  -out csr/ca.csr`
+`openssl req -new -config root.cnf -engine pkcs11 -keyform engine -key "pkcs11:object=Private key for Digital Signature;type=private"  -out csr/root.csr`
 
 ### Self Sign
-`openssl ca -selfsign -config root.cnf -in csr/ca.csr -out certs/root.crt -extensions ca_ext -keyform engine -engine pkcs11`
+`openssl ca -selfsign -config root.cnf -in csr/root.csr -out certs/root.crt -extensions ca_ext -keyform engine -engine pkcs11`
 
 ### Import x509 to Yubikey
 `ykman piv certificates import -m $YK_MANAGEMENT -P $YK_PIN 9c certs/root.crt`
 
 ## CRL
 ### Generate CRL
-`openssl ca -config root.cnf -keyform engine -engine pkcs11 -gencrl -out crl/root.crl -cert certs/ca.pem`
+`openssl ca -config root.cnf -keyform engine -engine pkcs11 -gencrl -out crl/root.crl -cert certs/root.crt`
 
 ## OCSP Cert
 ### Generate EC Params
