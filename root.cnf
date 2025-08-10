@@ -7,8 +7,11 @@ providers = provider_sect
 default = default_sect
 pkcs11 = pkcs11_sect
 
+# Load the pkcs11 module
 [pkcs11_sect]
+# Path to pkcs11-provider library. Default is the path on Fedora
 module = /usr/lib64/ossl-modules/pkcs11.so
+# Path to the yubikey pkcs11 library. Default is the path on Fedora
 pkcs11-module-path = /usr/lib64/libykcs11.so.2
 activate = 1
 
@@ -16,11 +19,10 @@ activate = 1
 activate = 1
 
 [default]
+# domain that is used to host the ca, crl, and optional ocsp responder
 issuer_domain = example.org
 org_name = "Demo"
 name = root
-engine = pkcs11
-keyform = engine
 ca_name = "Demo (Do not trust)"
 # URLs are based on the name and have the following paths
 aia_url = http://$issuer_domain/$name/ca
@@ -46,8 +48,6 @@ home                    = .
 database                = $home/db/index
 serial                  = $home/db/serial
 crlnumber               = $home/db/crlnumber
-engine                  = pkcs11
-keyform                 = engine
 private_key             = "pkcs11:object=Private key for Digital Signature;type=private"
 certificate             = $home/certs/$name.crt
 new_certs_dir           = $home/certs
@@ -87,6 +87,7 @@ nameConstraints=critical,@nc
 crlDistributionPoints = @crl_info
 authorityInfoAccess = @issuer_info
 
+# Name constraints. Can be generated with gen_permitted.py
 [ nc ]
 permitted;DNS.0=example.org
 permitted;URI.0=example.org
