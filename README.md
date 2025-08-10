@@ -94,7 +94,7 @@ You may need to change the line `MODULE_PATH` in the `pkcs11_section` of `root.c
 `openssl genpkey -genparam -algorithm ec -pkeyopt ec_paramgen_curve:secp384r1 -out ECPARAM.pem`
 
 ### Generate EC Key and CSR
-`openssl req -new -config root.cnf -newkey ec:ECPARAM.pem -subj "/C=$SSL_C/O=$SSL_O/CN=OCSP Root Responder" -keyout private/root-ocsp.key -out root-ocsp.csr`
+`openssl req -new -config root.cnf -newkey ec:ECPARAM.pem -subj "/C={Insert_Country}/O={Insert_Orgranization}/CN=OCSP Root Responder" -keyout private/root-ocsp.key -out root-ocsp.csr`
 
 ### Create OCSP Cert
 Optional and this cert can not be revoked.
