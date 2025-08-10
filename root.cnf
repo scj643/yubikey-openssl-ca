@@ -1,14 +1,19 @@
 openssl_conf = openssl_init
 
 [openssl_init]
-engines = engine_section
-[engine_section]
-pkcs11 = pkcs11_section
-[pkcs11_section]
-engine_id = pkcs11
-MODULE_PATH = /usr/lib64/libykcs11.so.2
-VERBOSE = EMPTY
-init = 0
+providers = provider_sect
+
+[provider_sect]
+default = default_sect
+pkcs11 = pkcs11_sect
+
+[pkcs11_sect]
+module = /usr/lib64/ossl-modules/pkcs11.so
+pkcs11-module-path = /usr/lib64/libykcs11.so.2
+activate = 1
+
+[default_sect]
+activate = 1
 
 [default]
 issuer_domain = example.org

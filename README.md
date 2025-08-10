@@ -2,12 +2,21 @@
 This repo documents how to use a Yubikey as a root CA with domain constraints to limit issuing certs.
 Using environment variables is not recommended. It is only done here for demonstration purposes.
 
+## Branches
+This repo has 2 branches.  
+`main` and `openssl1.1`  
+`main` is used for openssl 3.0 and later.
+`openssl1.1` is used for openssl 1.1 and is not recommneded.
+
 ## Package Requirements
 ### `yubico-piv-tool`
 Needed for the `libykcs11.so.2` library
 
 ### `ykman`
 Needed to manage the pin, puk, and management key
+
+### `pkcs11-provider`
+Allows access to the Yubikey.
 
 # gen\_permitted.py
 This script takes a list of domains and generate the name constraint list for you.
@@ -77,17 +86,17 @@ This will reset the pin to default
 You may need to change the line `MODULE_PATH` in the `pkcs11_section` of `root.cnf` depending on your OS
 
 ### CSR
-`openssl req -new -config root.cnf -engine pkcs11 -keyform engine -key "pkcs11:object=Private key for Digital Signature;type=private"  -out csr/root.csr`
+`openssl req -new -config root.cnf -key "pkcs11:object=Private key for Digital Signature;type=private"  -out csr/root.csr`
 
 ### Self Sign
-`openssl ca -selfsign -config root.cnf -in csr/root.csr -out certs/root.crt -extensions ca_ext -keyform engine -engine pkcs11`
+`openssl ca -selfsign -config root.cnf -in csr/root.csr -out certs/root.crt -extensions ca_ext`
 
 ### Import x509 to Yubikey
 `ykman piv certificates import -m $YK_MANAGEMENT -P $YK_PIN 9c certs/root.crt`
 
 ## CRL
 ### Generate CRL
-`openssl ca -config root.cnf -keyform engine -engine pkcs11 -gencrl -out crl/root.crl -cert certs/root.crt`
+`openssl ca -config root.cnf -gencrl -out crl/root.crl -cert certs/root.crt`
 
 ## OCSP Cert
 ### Generate EC Params
@@ -104,6 +113,23 @@ Optional and this cert can not be revoked.
 ## p11-tool
 Using p11-tool requires telling it to use the libykcs11.so.2 library.
 `alias p11tool-yk="p11tool --provider /usr/lib64/libykcs11.so.2"`
+## Listing URIs for keys
+To get the avaliable key URIs you can run the following.  
+First make sure you do `export OPENSSL_CONF={FULL_PATH_TO_CONFIG}`
+
+`openssl storeutl -keys -text pkcs11:`
+
+You will need to unquote the output for use in the config file.
+This can be done by using the following python one liner.
+
+`python -c "from urllib.parse import unquote; print(unquote(input('Quoted URI: ')))"`
+
+### Example
+#### Input
+`pkcs11:model=YubiKey%20YK5;manufacturer=Yubico%20(www.yubico.com);serial=12345678;token=YubiKey%20PIV%20%2312345678;id=%02;object=Private%20key%20for%20Digital%20Signature;type=private`
+#### Output
+`pkcs11:model=YubiKey YK5;manufacturer=Yubico (www.yubico.com);serial=12345678;token=YubiKey PIV #12345678;id=;object=Private key for Digital Signature;type=private`
+
 # References
 [Openssl Cookbook: Creating a Root CA](https://www.feistyduck.com/library/openssl-cookbook/online/openssl-command-line/private-ca-creating-root.html)  
 [Smallstep: Build a Tiny Certificate Authority For Your Homelab](https://smallstep.com/blog/build-a-tiny-ca-with-raspberry-pi-yubikey/)  
@@ -113,3 +139,8 @@ Using p11-tool requires telling it to use the libykcs11.so.2 library.
 ## http://cedric.dufour.name
 [Yubikey PIV Info](http://cedric.dufour.name/blah/IT/YubiKeyHowto.html)  
 [General PKCS11 Info](http://cedric.dufour.name/blah/IT/SmartCardsHowto.html)  
+
+## [pkcs11-provider](https://github.com/latchset/pkcs11-provider)
+[HOWTO.md](https://github.com/latchset/pkcs11-provider/blob/main/HOWTO.md)
+
+
