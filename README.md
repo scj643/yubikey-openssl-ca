@@ -100,14 +100,14 @@ You may need to change the line `MODULE_PATH` in the `pkcs11_section` of `root.c
 
 ## OCSP Cert
 ### Generate EC Params
-`openssl genpkey -genparam -algorithm ec -pkeyopt ec_paramgen_curve:secp384r1 -out ECPARAM.pem`
+`openssl genpkey -genparam -algorithm ec -pkeyopt ec_paramgen_curve:secp384r1 -out public/ECPARAM.pem`
 
 ### Generate EC Key and CSR
-`openssl req -new -config root.cnf -newkey ec:ECPARAM.pem -subj "/C={Insert_Country}/O={Insert_Orgranization}/CN=OCSP Root Responder" -keyout private/root-ocsp.key -out root-ocsp.csr`
+`openssl req -new -config root.cnf -newkey ec:public/ECPARAM.pem -subj "/C={Insert_Country}/O={Insert_Orgranization}/CN=OCSP Root Responder" -keyout private/root-ocsp.key -out csr/root-ocsp.csr`
 
 ### Create OCSP Cert
 Optional and this cert can not be revoked.
-`openssl ca -config root.cnf -keyform engine -engine pkcs11 -in root-ocsp.csr -out root-ocsp.crt -extensions ocsp_ext -days 365`
+`openssl ca -config root.cnf -in csr/root-ocsp.csr -out public/root-ocsp.crt -extensions ocsp_ext -days 365`
 
 # Notes
 ## p11-tool
